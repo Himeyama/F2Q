@@ -120,7 +120,6 @@ namespace File2QR
         private async void Open(object sender, RoutedEventArgs e)
         {
             FileOpenPicker openPicker = new();
-            //var window = WindowHelper.GetWindowForElement(this);
             IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
 
             WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
@@ -134,13 +133,11 @@ namespace File2QR
             byte[] fileData = File.ReadAllBytes(file.Path);
             string base64text = Convert.ToBase64String(fileData);
 
-            //TextBlock tb = new();
-            //tb.Text = base64text;
-            //DataText.Blocks.Add(tb);
             Paragraph paragraph = new();
             Run run = new();
-            run.Text = base64text;
+            run.Text = System.Text.Encoding.UTF8.GetString(fileData);
             paragraph.Inlines.Add(run);
+            DataText.Blocks.Clear();
             DataText.Blocks.Add(paragraph);
 
             string text = $"data:text/plain;charset=UTF-8;base64,{base64text}";
@@ -149,8 +146,8 @@ namespace File2QR
                 Format = BarcodeFormat.QR_CODE,
                 Options = new QrCodeEncodingOptions
                 {
-                    Height = 3200,
-                    Width = 3200
+                    Height = 2000,
+                    Width = 2000
                 }
             };
 

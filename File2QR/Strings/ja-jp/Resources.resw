@@ -123,9 +123,6 @@
   <data name="AppDescription" xml:space="preserve">
     <value>TXT2QR</value>
   </data>
-  <data name="File.Title" xml:space="preserve">
-    <value>ファイル</value>
-  </data>
   <data name="Views.Title" xml:space="preserve">
     <value>表示</value>
   </data>
@@ -141,5 +138,14 @@
   </data>
   <data name="Open.Text" xml:space="preserve">
     <value>開く...</value>
+  </data>
+  <data name="Edit.Title" xml:space="preserve">
+    <value>編集</value>
+  </data>
+  <data name="Files.Title" xml:space="preserve">
+    <value>ファイル</value>
+  </data>
+  <data name="Help.Title" xml:space="preserve">
+    <value>ヘルプ</value>
   </data>
 </root>
