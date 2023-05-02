@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "File2QR (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "File2QR (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
