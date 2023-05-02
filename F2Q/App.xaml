@@ -2,10 +2,10 @@
 <!-- Licensed under the MIT License. -->
 
 <Application
-    x:Class="File2QR.App"
+    x:Class="F2Q.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:File2QR">
+    xmlns:local="using:F2Q">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

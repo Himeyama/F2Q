@@ -118,19 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AppDisplayName" xml:space="preserve">
-    <value>TXT2QR</value>
+    <value>F2Q</value>
   </data>
   <data name="AppDescription" xml:space="preserve">
-    <value>TXT2QR</value>
+    <value>F2Q</value>
   </data>
-  <data name="ShellMenuBarItem_File.Title" xml:space="preserve">
-    <value>File</value>
+  <data name="Views.Title" xml:space="preserve">
+    <value>表示</value>
   </data>
-  <data name="ShellMenuBarItem_Views.Title" xml:space="preserve">
-    <value>Views</value>
-  </data>
-  <data name="ShellMenuItem_File_Exit.Text" xml:space="preserve">
-    <value>Exit</value>
+  <data name="Exit.Text" xml:space="preserve">
+    <value>終了</value>
   </data>
   <data name="ShellMenuItem_Views_Main.Text" xml:space="preserve">
     <value>Main</value>
@@ -139,7 +136,16 @@
     <value>Main</value>
     <comment>Page title for MainPage</comment>
   </data>
-  <data name="ShellMenuItem_File_Open.Text" xml:space="preserve">
-    <value>Open...</value>
+  <data name="Open.Text" xml:space="preserve">
+    <value>開く...</value>
+  </data>
+  <data name="Edit.Title" xml:space="preserve">
+    <value>編集</value>
+  </data>
+  <data name="Files.Title" xml:space="preserve">
+    <value>ファイル</value>
+  </data>
+  <data name="Help.Title" xml:space="preserve">
+    <value>ヘルプ</value>
   </data>
 </root>

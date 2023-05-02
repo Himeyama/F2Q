@@ -1,9 +1,9 @@
 {
   "profiles": {
-    "File2QR (Package)": {
+    "F2Q (Package)": {
       "commandName": "MsixPackage"
     },
-    "File2QR (Unpackaged)": {
+    "F2Q (Unpackaged)": {
       "commandName": "Project"
     }
   }
