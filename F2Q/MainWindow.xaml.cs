@@ -1,28 +1,20 @@
-// Copyright (c) Microsoft Corporation and Contributors.
+﻿// Copyright (c) Microsoft Corporation and Contributors.
 // Licensed under the MIT License.
 
-using Microsoft.UI.Xaml;
-using static System.Net.Mime.MediaTypeNames;
-using ZXing.QrCode;
-using ZXing;
-using System.Drawing;
-using Microsoft.UI.Xaml.Media;
-using System.Runtime.InteropServices;
-using System;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Imaging;
-using System.IO;
-using Windows.Storage.Pickers;
-using Windows.Storage;
-using Microsoft.UI.Xaml.Documents;
-using Microsoft.UI;
-using Windows.UI.ViewManagement;
-using Windows.ApplicationModel.Core;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
-using System.Runtime.InteropServices; // For DllImport
-using WinRT;
+using Microsoft.UI.Xaml.Documents;
+using Microsoft.UI.Xaml.Media.Imaging;
+using System;
+using System.Drawing;
+using System.IO;
+using System.Runtime.InteropServices;
 using Windows.ApplicationModel;
+using Windows.Storage;
+using Windows.Storage.Pickers;
+using WinRT;
+using ZXing;
+using ZXing.QrCode;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
@@ -36,6 +28,9 @@ namespace F2Q
         WindowsSystemDispatcherQueueHelper m_wsdqHelper; // See below for implementation.
         MicaController m_backdropController;
         SystemBackdropConfiguration m_configurationSource;
+
+        string plainText = "";
+        string base64text;
 
         public MainWindow()
         {
@@ -66,9 +61,9 @@ namespace F2Q
 
                 m_backdropController = new Microsoft.UI.Composition.SystemBackdrops.MicaController();
 
-            // Enable the system backdrop.
-            // Note: Be sure to have "using WinRT;" to support the Window.As<...>() call.
-            m_backdropController.AddSystemBackdropTarget(this.As<Microsoft.UI.Composition.ICompositionSupportsSystemBackdrop>());
+                // Enable the system backdrop.
+                // Note: Be sure to have "using WinRT;" to support the Window.As<...>() call.
+                m_backdropController.AddSystemBackdropTarget(this.As<Microsoft.UI.Composition.ICompositionSupportsSystemBackdrop>());
                 m_backdropController.SetSystemBackdropConfiguration(m_configurationSource);
                 return true; // succeeded
             }
@@ -119,11 +114,10 @@ namespace F2Q
 
         private async void Open(object sender, RoutedEventArgs e)
         {
+            // ファイルを開く + 読み込み
             FileOpenPicker openPicker = new();
             IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-
             WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
-
             openPicker.ViewMode = PickerViewMode.Thumbnail;
             openPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
             openPicker.FileTypeFilter.Add(".txt");
@@ -131,26 +125,47 @@ namespace F2Q
             StorageFile file = await openPicker.PickSingleFileAsync();
             if (file == null) return;
             byte[] fileData = File.ReadAllBytes(file.Path);
-            string base64text = Convert.ToBase64String(fileData);
+            base64text = Convert.ToBase64String(fileData);
+            plainText = System.Text.Encoding.UTF8.GetString(fileData);
+            Refresh();
+        }
 
+        private void RadioRefresh(object sender, RoutedEventArgs e)
+        {
+            Refresh();
+        }
+
+        private void Refresh()
+        {
+            if (plainText == "") return;
+
+            // 読み込んだデータの書き込み
             Paragraph paragraph = new();
             Run run = new();
-            run.Text = System.Text.Encoding.UTF8.GetString(fileData);
+            run.Text = plainText;
             paragraph.Inlines.Add(run);
             DataText.Blocks.Clear();
             DataText.Blocks.Add(paragraph);
-
-            string text = $"data:text/plain;charset=UTF-8;base64,{base64text}";
+            string text = "";
+            if (SetDataTextUTF8Base64.IsChecked)
+            {
+                text = $"data:text/plain;charset=UTF-8;base64,{base64text}";
+            }
+            else if (SetPlainText.IsChecked)
+            {
+                text = plainText;
+            }
+            // QR コードの生成と表示
             BarcodeWriter writer = new BarcodeWriter
             {
                 Format = BarcodeFormat.QR_CODE,
                 Options = new QrCodeEncodingOptions
                 {
                     Height = 2000,
-                    Width = 2000
+                    Width = 2000,
+                    CharacterSet = "UTF-8",
                 }
             };
-
             Bitmap bitmap = writer.Write(text);
             BitmapImage bitmapImage = new BitmapImage();
             using (MemoryStream stream = new MemoryStream())

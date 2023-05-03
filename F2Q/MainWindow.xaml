@@ -25,6 +25,8 @@
                 </MenuBarItem>
 
                 <MenuBarItem x:Uid="Edit" Title="Edit">
+                    <RadioMenuFlyoutItem x:Name="SetDataTextUTF8Base64" Text="data:text/plain;charset=UTF-8;base64,..." GroupName="FormatGroup" IsChecked="True" Click="RadioRefresh"/>
+                    <RadioMenuFlyoutItem x:Name="SetPlainText" x:Uid="PlainText" Text="Plain Text" GroupName="FormatGroup" Click="RadioRefresh"/>
                 </MenuBarItem>
 
                 <MenuBarItem x:Uid="Help" Title="Help">
