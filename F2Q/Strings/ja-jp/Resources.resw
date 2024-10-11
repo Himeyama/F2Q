@@ -148,6 +148,9 @@
   <data name="Help.Title" xml:space="preserve">
     <value>ヘルプ</value>
   </data>
+  <data name="About.Text" xml:space="preserve">
+    <value>F2Q について</value>
+  </data>
   <data name="PlainText.Text" xml:space="preserve">
     <value>平文</value>
   </data>

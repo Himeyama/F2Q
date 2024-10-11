@@ -1,7 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation and Contributors.
-// Licensed under the MIT License.
-
-using Microsoft.UI.Composition.SystemBackdrops;
+﻿using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Media.Imaging;
@@ -9,14 +6,11 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
-using Windows.ApplicationModel;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using WinRT;
 using ZXing;
 using ZXing.QrCode;
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace F2Q
 {
@@ -25,58 +19,57 @@ namespace F2Q
     /// </summary>
     public sealed partial class MainWindow : Window
     {
-        WindowsSystemDispatcherQueueHelper m_wsdqHelper; // See below for implementation.
+        WindowsSystemDispatcherQueueHelper m_wsdqHelper;
         MicaController m_backdropController;
         SystemBackdropConfiguration m_configurationSource;
 
         string plainText = "";
         string base64text;
 
+        void Debug(string message){
+            string logFilePath = "log.txt";
+            using (StreamWriter writer = new StreamWriter(logFilePath, true))
+            {
+                writer.WriteLine($"[{DateTime.Now}] {message}");
+            }
+        }
+
         public MainWindow()
         {
-            this.InitializeComponent();
-            //Window window = App.MainWindow;
-            ExtendsContentIntoTitleBar = true;  // enable custom titlebar
-            SetTitleBar(AppTitleBar);
-            AppTitle.Text = AppInfo.Current.DisplayInfo.DisplayName;
+            InitializeComponent();
+            Title = "F2Q";
+            ExtendsContentIntoTitleBar = true;
+            SetTitleBar(DragArea);
             TrySetSystemBackdrop();
         }
 
         bool TrySetSystemBackdrop()
         {
-            if (Microsoft.UI.Composition.SystemBackdrops.MicaController.IsSupported())
+            if (MicaController.IsSupported())
             {
                 m_wsdqHelper = new WindowsSystemDispatcherQueueHelper();
                 m_wsdqHelper.EnsureWindowsSystemDispatcherQueueController();
-
-                // Create the policy object.
                 m_configurationSource = new SystemBackdropConfiguration();
-                this.Activated += Window_Activated;
-                this.Closed += Window_Closed;
-                ((FrameworkElement)this.Content).ActualThemeChanged += Window_ThemeChanged;
-
-                // Initial configuration state.
+                Activated += Window_Activated;
+                Closed += Window_Closed;
+                ((FrameworkElement)Content).ActualThemeChanged += Window_ThemeChanged;
                 m_configurationSource.IsInputActive = true;
                 SetConfigurationSourceTheme();
 
-                m_backdropController = new Microsoft.UI.Composition.SystemBackdrops.MicaController();
-
-                // Enable the system backdrop.
-                // Note: Be sure to have "using WinRT;" to support the Window.As<...>() call.
+                m_backdropController = new MicaController();
                 m_backdropController.AddSystemBackdropTarget(this.As<Microsoft.UI.Composition.ICompositionSupportsSystemBackdrop>());
                 m_backdropController.SetSystemBackdropConfiguration(m_configurationSource);
-                return true; // succeeded
+                return true;
             }
-
-            return false; // Mica is not supported on this system
+            return false;
         }
 
-        private void Window_Activated(object sender, WindowActivatedEventArgs args)
+        void Window_Activated(object _sender, WindowActivatedEventArgs args)
         {
             m_configurationSource.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
         }
 
-        private void Window_Closed(object sender, WindowEventArgs args)
+        void Window_Closed(object _sender, WindowEventArgs _args)
         {
             // Make sure any Mica/Acrylic controller is disposed
             // so it doesn't try to use this closed window.
@@ -85,11 +78,11 @@ namespace F2Q
                 m_backdropController.Dispose();
                 m_backdropController = null;
             }
-            this.Activated -= Window_Activated;
+            Activated -= Window_Activated;
             m_configurationSource = null;
         }
 
-        private void Window_ThemeChanged(FrameworkElement sender, object args)
+        void Window_ThemeChanged(FrameworkElement _sender, object _args)
         {
             if (m_configurationSource != null)
             {
@@ -97,9 +90,9 @@ namespace F2Q
             }
         }
 
-        private void SetConfigurationSourceTheme()
+        void SetConfigurationSourceTheme()
         {
-            switch (((FrameworkElement)this.Content).ActualTheme)
+            switch (((FrameworkElement)Content).ActualTheme)
             {
                 case ElementTheme.Dark: m_configurationSource.Theme = Microsoft.UI.Composition.SystemBackdrops.SystemBackdropTheme.Dark; break;
                 case ElementTheme.Light: m_configurationSource.Theme = Microsoft.UI.Composition.SystemBackdrops.SystemBackdropTheme.Light; break;
@@ -107,12 +100,12 @@ namespace F2Q
             }
         }
 
-        private void Exit(object sender, RoutedEventArgs e)
+        void Exit(object _sender, RoutedEventArgs _e)
         {
-            this.Close();
+            Close();
         }
 
-        private async void Open(object sender, RoutedEventArgs e)
+        async void Open(object _sender, RoutedEventArgs _e)
         {
             // ファイルを開く + 読み込み
             FileOpenPicker openPicker = new();
@@ -130,12 +123,17 @@ namespace F2Q
             Refresh();
         }
 
-        private void RadioRefresh(object sender, RoutedEventArgs e)
+        void RadioRefresh(object _sender, RoutedEventArgs _e)
         {
             Refresh();
         }
 
-        private void Refresh()
+        void About(object _sender, RoutedEventArgs _e)
+        {
+            _ = Dialog.CreateDialog(this, "F2Q", "© 2023-2024 ひかり");
+        }
+
+        void Refresh()
         {
             if (plainText == "") return;
 
@@ -190,7 +188,7 @@ namespace F2Q
         }
 
         [DllImport("CoreMessaging.dll")]
-        private static extern int CreateDispatcherQueueController([In] DispatcherQueueOptions options, [In, Out, MarshalAs(UnmanagedType.IUnknown)] ref object dispatcherQueueController);
+        static extern int CreateDispatcherQueueController([In] DispatcherQueueOptions options, [In, Out, MarshalAs(UnmanagedType.IUnknown)] ref object dispatcherQueueController);
 
         object m_dispatcherQueueController = null;
         public void EnsureWindowsSystemDispatcherQueueController()

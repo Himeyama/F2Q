@@ -11,10 +11,31 @@
     mc:Ignorable="d">
 
     <Grid RowDefinitions="40, *">
+        <Grid Grid.Row="0">
+            <Border x:Name="AppTitleBar"
+            VerticalAlignment="Center"
+            Height="40"
+            Canvas.ZIndex="1" 
+            Margin="0,0,0,0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Image x:Name="AppFontIcon"
+                        HorizontalAlignment="Left" 
+                        VerticalAlignment="Center"
+                        Source="Assets/Square44x44Logo.png" 
+                        Width="16" 
+                        Height="16"
+                        Margin="16, 0, 0, 0"/>
+                    <TextBlock x:Name="AppTitle"
+                        Text="F2Q"
+                        VerticalAlignment="Center"
+                        Margin="12, 0, 0, 0"
+                        Style="{StaticResource CaptionTextBlockStyle}" />
+                </StackPanel>
+            </Border>
+        </Grid>
         <Grid ColumnDefinitions="Auto, *" Grid.Row="0">
             <MenuBar Grid.Column="0">
                 <MenuBarItem x:Uid="Files" Title="Files">
-                    <!--MenuFlyoutItem Text="New" Click="Convert"/-->
                     <MenuFlyoutItem x:Uid="Open" Text="Open..." Click="Open"/>
                     <MenuFlyoutSeparator/>
                     <MenuFlyoutItem x:Uid="Exit" Text="Exit" Click="Exit">
@@ -30,29 +51,15 @@
                 </MenuBarItem>
 
                 <MenuBarItem x:Uid="Help" Title="Help">
-                    <MenuFlyoutItem x:Uid="About" Text="About"/>
+                    <MenuFlyoutItem x:Uid="About" Text="About" Click="About"/>
                 </MenuBarItem>
             </MenuBar>
-            <Border x:Name="AppTitleBar"
+            <Border x:Name="DragArea"
                 VerticalAlignment="Center"
                 Height="40"
                 Canvas.ZIndex="1" 
                 Margin="0,0,0,0"
                 Grid.Column="1">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Image x:Name="AppFontIcon"
-                        HorizontalAlignment="Left" 
-                        VerticalAlignment="Center"
-                        Source="Assets/Square44x44Logo.png" 
-                        Width="16" 
-                        Height="16"
-                        Margin="16, 0, 0, 0"/>
-                    <TextBlock x:Name="AppTitle"
-                        Text="Test App Title"
-                        VerticalAlignment="Center"
-                        Margin="12, 0, 0, 0"
-                        Style="{StaticResource CaptionTextBlockStyle}" />
-                </StackPanel>
             </Border>
         </Grid>
 
