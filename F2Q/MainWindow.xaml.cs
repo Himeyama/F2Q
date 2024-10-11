@@ -14,9 +14,6 @@ using ZXing.QrCode;
 
 namespace F2Q
 {
-    /// <summary>
-    /// An empty window that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class MainWindow : Window
     {
         WindowsSystemDispatcherQueueHelper m_wsdqHelper;
@@ -26,11 +23,20 @@ namespace F2Q
         string plainText = "";
         string base64text;
 
-        void Debug(string message){
+        void LogMessage(string message)
+        {
             string logFilePath = "log.txt";
-            using (StreamWriter writer = new StreamWriter(logFilePath, true))
+            try
             {
-                writer.WriteLine($"[{DateTime.Now}] {message}");
+                using (StreamWriter writer = new StreamWriter(logFilePath, true))
+                {
+                    writer.WriteLine($"[{DateTime.Now}] {message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                // エラー処理
+                Console.WriteLine($"Logging failed: {ex.Message}");
             }
         }
 
@@ -71,8 +77,6 @@ namespace F2Q
 
         void Window_Closed(object _sender, WindowEventArgs _args)
         {
-            // Make sure any Mica/Acrylic controller is disposed
-            // so it doesn't try to use this closed window.
             if (m_backdropController != null)
             {
                 m_backdropController.Dispose();
@@ -94,9 +98,15 @@ namespace F2Q
         {
             switch (((FrameworkElement)Content).ActualTheme)
             {
-                case ElementTheme.Dark: m_configurationSource.Theme = Microsoft.UI.Composition.SystemBackdrops.SystemBackdropTheme.Dark; break;
-                case ElementTheme.Light: m_configurationSource.Theme = Microsoft.UI.Composition.SystemBackdrops.SystemBackdropTheme.Light; break;
-                case ElementTheme.Default: m_configurationSource.Theme = Microsoft.UI.Composition.SystemBackdrops.SystemBackdropTheme.Default; break;
+                case ElementTheme.Dark:
+                    m_configurationSource.Theme = Microsoft.UI.Composition.SystemBackdrops.SystemBackdropTheme.Dark;
+                    break;
+                case ElementTheme.Light:
+                    m_configurationSource.Theme = Microsoft.UI.Composition.SystemBackdrops.SystemBackdropTheme.Light;
+                    break;
+                case ElementTheme.Default:
+                    m_configurationSource.Theme = Microsoft.UI.Composition.SystemBackdrops.SystemBackdropTheme.Default;
+                    break;
             }
         }
 
@@ -107,7 +117,6 @@ namespace F2Q
 
         async void Open(object _sender, RoutedEventArgs _e)
         {
-            // ファイルを開く + 読み込み
             FileOpenPicker openPicker = new();
             IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
@@ -117,9 +126,24 @@ namespace F2Q
             openPicker.FileTypeFilter.Add(".md");
             StorageFile file = await openPicker.PickSingleFileAsync();
             if (file == null) return;
-            byte[] fileData = File.ReadAllBytes(file.Path);
-            base64text = Convert.ToBase64String(fileData);
-            plainText = System.Text.Encoding.UTF8.GetString(fileData);
+
+            try
+            {
+                Windows.Storage.Streams.IBuffer buffer = await FileIO.ReadBufferAsync(file);
+                using (var dataReader = Windows.Storage.Streams.DataReader.FromBuffer(buffer))
+                {
+                    byte[] fileData = new byte[buffer.Length];
+                    dataReader.ReadBytes(fileData);
+                    base64text = Convert.ToBase64String(fileData);
+                    plainText = System.Text.Encoding.UTF8.GetString(fileData);
+                }
+            }
+            catch (Exception ex)
+            {
+                // エラー処理
+                LogMessage($"File read failed: {ex.Message}");
+            }
+
             Refresh();
         }
 
@@ -135,47 +159,43 @@ namespace F2Q
 
         void Refresh()
         {
-            if (plainText == "") return;
+            if (string.IsNullOrEmpty(plainText)) return;
 
-            // 読み込んだデータの書き込み
             Paragraph paragraph = new();
-            Run run = new();
-            run.Text = plainText;
+            Run run = new() { Text = plainText };
             paragraph.Inlines.Add(run);
             DataText.Blocks.Clear();
             DataText.Blocks.Add(paragraph);
-            string text = "";
-            if (SetDataTextUTF8Base64.IsChecked)
+            string text = SetDataTextUTF8Base64.IsChecked ? $"data:text/plain;charset=UTF-8;base64,{base64text}" : plainText;
+
+            try
             {
-                text = $"data:text/plain;charset=UTF-8;base64,{base64text}";
-            }
-            else if (SetPlainText.IsChecked)
-            {
-                text = plainText;
-            }
-            // QR コードの生成と表示
-            BarcodeWriter writer = new BarcodeWriter
-            {
-                Format = BarcodeFormat.QR_CODE,
-                Options = new QrCodeEncodingOptions
+                BarcodeWriter writer = new()
                 {
-                    Height = 2000,
-                    Width = 2000,
-                    CharacterSet = "UTF-8",
+                    Format = BarcodeFormat.QR_CODE,
+                    Options = new QrCodeEncodingOptions
+                    {
+                        Height = 2000,
+                        Width = 2000,
+                        CharacterSet = "UTF-8",
+                    }
+                };
+                Bitmap bitmap = writer.Write(text);
+                BitmapImage bitmapImage = new();
+                using (MemoryStream stream = new())
+                {
+                    bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                    stream.Position = 0;
+                    bitmapImage.SetSource(stream.AsRandomAccessStream());
                 }
-            };
-            Bitmap bitmap = writer.Write(text);
-            BitmapImage bitmapImage = new BitmapImage();
-            using (MemoryStream stream = new MemoryStream())
-            {
-                bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                stream.Position = 0;
-                bitmapImage.SetSource(stream.AsRandomAccessStream());
+                QRCodeImage.Source = bitmapImage;
             }
-            QRCodeImage.Source = bitmapImage;
+            catch (Exception ex)
+            {
+                LogMessage($"QR code generation failed: {ex.Message}");
+            }
         }
     }
-
 
     class WindowsSystemDispatcherQueueHelper
     {
@@ -195,7 +215,6 @@ namespace F2Q
         {
             if (Windows.System.DispatcherQueue.GetForCurrentThread() != null)
             {
-                // one already exists, so we'll just use it.
                 return;
             }
 
